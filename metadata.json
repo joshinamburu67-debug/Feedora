@@ -1,0 +1,6 @@
+{
+  "name": "Vexlora India Feedback Portal",
+  "description": "Submit feedback directly to Vexlora India with AI-powered refinement, categorization, and instant email dispatch via Gmail.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
