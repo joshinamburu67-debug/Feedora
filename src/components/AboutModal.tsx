@@ -64,10 +64,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
           <div className="space-y-2 pt-2 border-t border-slate-100">
             <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Data Privacy &amp; Gmail Permission
+              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Data Privacy &amp; Google Sign-In
             </h3>
             <p>
-              When you connect with Google, the app requests permission specifically to dispatch your feedback email directly to Vexlora India from your verified address. Your credentials and tokens are cached strictly in memory during your browser session and are never stored on external databases.
+              When you connect with Google, the app uses standard authentication strictly to autofill your name and email. We do not request access to your personal emails or account data.
             </p>
           </div>
         </div>

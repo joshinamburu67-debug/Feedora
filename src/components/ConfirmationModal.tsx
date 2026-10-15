@@ -35,10 +35,10 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </div>
             <div>
               <h2 id="confirm-dialog-title" className="text-lg font-bold">
-                Confirm Feedback Dispatch
+                Confirm Feedback Submission
               </h2>
               <p className="text-xs text-blue-200 mt-0.5">
-                Review email details before sending via Gmail API
+                Review details before sending to Vexlora India
               </p>
             </div>
           </div>
@@ -55,11 +55,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
         {/* Modal Body */}
         <div className="p-6 space-y-4">
-          <div className="flex items-start gap-3 p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs leading-relaxed">
-            <ShieldAlert className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 p-3.5 bg-blue-50 rounded-xl border border-blue-200 text-blue-900 text-xs leading-relaxed">
+            <Mail className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>End-User Authorization Notice:</strong> With your permission, this action will immediately send an email message on your behalf from your authenticated Gmail address to{' '}
-              <span className="font-semibold text-amber-950">{TARGET_EMAIL}</span>.
+              <strong>Submission Notice:</strong> Your feedback will be submitted directly to{' '}
+              <span className="font-semibold text-blue-950 font-mono">{TARGET_EMAIL}</span>.
             </div>
           </div>
 

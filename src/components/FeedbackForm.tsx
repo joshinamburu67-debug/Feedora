@@ -137,16 +137,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({
 
     setErrors({});
 
-    // Check if user is authenticated with Google (required to send via Gmail API)
-    if (!user) {
-      // Highlight sign-in necessity
-      setErrors({
-        auth: 'Please connect your Google account below so your feedback can be dispatched directly to vexloraindia@gmail.com via Gmail.',
-      });
-      return;
-    }
-
-    // Trigger confirmation modal (MANDATORY per Workspace guidelines)
+    // Trigger confirmation modal for all users
     onRequestConfirm(currentData);
   };
 
@@ -169,42 +160,25 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({
               All responses submitted through this form are formatted and dispatched directly to{' '}
               <span className="font-mono font-semibold text-blue-300 bg-blue-950/80 px-2 py-0.5 rounded border border-blue-700/50">
                 {TARGET_EMAIL}
-              </span>{' '}
-              via the Google Gmail integration.
+              </span>.
             </p>
           </div>
 
           {!user && (
-            <div className="flex-shrink-0 bg-slate-900/90 p-4 rounded-xl border border-slate-700/80 max-w-xs space-y-2">
-              <p className="text-xs text-slate-300">
-                Connect your Google account to authorize instant delivery to Vexlora India:
+            <div className="flex-shrink-0 bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80 max-w-xs space-y-1.5">
+              <p className="text-[11px] text-slate-300">
+                Optional: Sign in with Google to autofill your name and email:
               </p>
               <GoogleSignInButton
                 onClick={onSignIn}
                 isLoading={isSigningIn}
-                text="Sign in to Send"
+                text="Quick Sign In"
                 className="w-full text-xs py-2"
               />
             </div>
           )}
         </div>
       </div>
-
-      {/* Auth Error Banner if needed */}
-      {errors.auth && (
-        <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 text-amber-900 text-xs flex items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span>{errors.auth}</span>
-          </div>
-          <GoogleSignInButton
-            onClick={onSignIn}
-            isLoading={isSigningIn}
-            text="Connect Google"
-            className="text-xs py-1.5 px-3 flex-shrink-0"
-          />
-        </div>
-      )}
 
       {/* Main Feedback Form Card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
@@ -510,30 +484,20 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            {user ? (
-              <button
-                type="submit"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold shadow-md transition cursor-pointer"
-              >
-                <Send className="w-4 h-4" />
-                <span>Submit to vexloraindia@gmail.com</span>
-              </button>
-            ) : (
-              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold shadow-sm transition cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Review &amp; Send Feedback</span>
-                </button>
-                <GoogleSignInButton
-                  onClick={onSignIn}
-                  isLoading={isSigningIn}
-                  text="Connect Gmail First"
-                  className="text-xs py-2 px-3 w-full sm:w-auto"
-                />
-              </div>
+            <button
+              type="submit"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold shadow-md transition cursor-pointer"
+            >
+              <Send className="w-4 h-4" />
+              <span>Submit to vexloraindia@gmail.com</span>
+            </button>
+            {!user && (
+              <GoogleSignInButton
+                onClick={onSignIn}
+                isLoading={isSigningIn}
+                text="Sign in with Google"
+                className="text-xs py-2.5 px-3 w-full sm:w-auto"
+              />
             )}
           </div>
         </div>

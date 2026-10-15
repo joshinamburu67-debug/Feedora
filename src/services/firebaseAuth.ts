@@ -26,8 +26,7 @@ if (typeof window !== 'undefined') {
 }
 
 const provider = new GoogleAuthProvider();
-// Primary scope for Gmail API email sending
-provider.addScope('https://www.googleapis.com/auth/gmail.send');
+// Standard identity scopes (profile, email) are used by default without sensitive permissions
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;
@@ -38,12 +37,7 @@ export const initAuth = (
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
-        cachedAccessToken = null;
-        if (onAuthFailure) onAuthFailure();
-      }
+      if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken || '');
     } else {
       cachedAccessToken = null;
       if (onAuthFailure) onAuthFailure();
@@ -56,12 +50,8 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
     isSigningIn = true;
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
-    if (!credential?.accessToken) {
-      throw new Error('Failed to obtain Gmail authorization token from Google sign-in.');
-    }
-
-    cachedAccessToken = credential.accessToken;
-    return { user: result.user, accessToken: cachedAccessToken };
+    cachedAccessToken = credential?.accessToken || null;
+    return { user: result.user, accessToken: cachedAccessToken || '' };
   } catch (error: any) {
     console.error('Google sign in error:', error);
     throw error;

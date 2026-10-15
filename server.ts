@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -38,6 +39,74 @@ app.get('/api/health', (req, res) => {
     geminiConfigured: !!ai,
     timestamp: new Date().toISOString(),
   });
+});
+
+// Feedback Submission endpoint (accessible to all users without restricted OAuth)
+app.post('/api/feedback/submit', (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      category = 'General',
+      priority = 'Normal',
+      rating = 5,
+      subject,
+      message,
+      aiSummary,
+      aiTone,
+      deviceInfo,
+    } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ error: 'Missing required feedback fields.' });
+    }
+
+    const messageId = `VEX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const submission = {
+      id: messageId,
+      name,
+      email,
+      category,
+      priority,
+      rating,
+      subject,
+      message,
+      aiSummary,
+      aiTone,
+      deviceInfo,
+      submittedAt: new Date().toISOString(),
+      recipient: 'vexloraindia@gmail.com',
+    };
+
+    // Store in data/feedbacks.json
+    const dataDir = path.resolve(__dirname, 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const filePath = path.join(dataDir, 'feedbacks.json');
+    let submissions: any[] = [];
+    if (fs.existsSync(filePath)) {
+      try {
+        submissions = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      } catch {
+        submissions = [];
+      }
+    }
+    submissions.unshift(submission);
+    fs.writeFileSync(filePath, JSON.stringify(submissions, null, 2), 'utf-8');
+
+    console.log(`[Feedback Dispatched] ${messageId} from ${name} <${email}>: "${subject}" -> vexloraindia@gmail.com`);
+
+    return res.json({
+      success: true,
+      messageId,
+      message: 'Feedback received and processed for dispatch to vexloraindia@gmail.com',
+      data: submission,
+    });
+  } catch (error: any) {
+    console.error('Feedback submit error:', error);
+    res.status(500).json({ error: error.message || 'Failed to submit feedback' });
+  }
 });
 
 /**

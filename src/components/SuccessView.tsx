@@ -41,8 +41,8 @@ ${feedback.message}`;
           Feedback Successfully Dispatched!
         </h2>
         <p className="text-sm text-slate-600 max-w-md mx-auto">
-          Your feedback has been sent directly to the official mailbox{' '}
-          <strong className="text-blue-600 font-semibold">{TARGET_EMAIL}</strong> using the Google Gmail API.
+          Your feedback has been submitted directly to{' '}
+          <strong className="text-blue-600 font-semibold">{TARGET_EMAIL}</strong>.
         </p>
       </div>
 
@@ -72,7 +72,7 @@ ${feedback.message}`;
 
           {messageId && (
             <>
-              <span className="text-slate-500">Gmail Msg ID:</span>
+              <span className="text-slate-500">Tracking Ref:</span>
               <span className="font-mono text-slate-600 truncate">{messageId}</span>
             </>
           )}
@@ -94,13 +94,11 @@ ${feedback.message}`;
         </button>
 
         <a
-          href="https://mail.google.com/mail/u/0/#sent"
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`mailto:${TARGET_EMAIL}?subject=${encodeURIComponent(`[Vexlora Feedback] [${feedback.category}] ${feedback.subject}`)}&body=${encodeURIComponent(`From: ${feedback.name} <${feedback.email}>\nCategory: ${feedback.category}\nRating: ${feedback.rating}/5\n\n${feedback.message}`)}`}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
         >
           <Mail className="w-4 h-4 text-slate-500" />
-          <span>View in Gmail Sent Folder</span>
+          <span>Open in Email App</span>
           <ExternalLink className="w-3 h-3 text-slate-400" />
         </a>
 

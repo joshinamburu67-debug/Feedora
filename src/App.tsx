@@ -124,51 +124,49 @@ export default function App() {
     setErrorMessage(null);
   };
 
-  // User confirmed send in the modal (MANDATORY per Workspace skill)
+  // User confirmed send in the modal
   const handleConfirmSend = async () => {
     if (!pendingFeedback) return;
-
-    let currentToken = token;
-    if (!currentToken) {
-      currentToken = await getAccessToken();
-    }
-
-    if (!currentToken) {
-      setErrorMessage(
-        'Your Gmail session has expired. Please sign in with Google again to authorize sending.'
-      );
-      setPendingFeedback(null);
-      return;
-    }
 
     setIsSending(true);
     setErrorMessage(null);
 
     try {
-      // 1. Build RFC 2822 message addressed to vexloraindia@gmail.com
-      const { raw } = buildRfc2822Email(pendingFeedback, TARGET_EMAIL);
+      // 1. Dispatch feedback to server endpoint
+      const response = await fetch('/api/feedback/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pendingFeedback),
+      });
 
-      // 2. Dispatch via Gmail API
-      const result = await sendGmailMessage(raw, currentToken);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Server failed to process feedback submission.');
+      }
 
-      // 3. Save to session history
+      const result = await response.json();
+      const messageId = result.messageId || `VEX-${Date.now().toString(36).toUpperCase()}`;
+
+      // 2. Save to session history
       const historyRecord: SentHistoryItem = {
-        id: result.id || Math.random().toString(36).substring(2, 9),
+        id: messageId,
         feedback: pendingFeedback,
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-        messageId: result.id,
+        messageId: messageId,
       };
       setSentHistory((prev) => [historyRecord, ...prev]);
 
-      // 4. Update UI to success screen
-      setLastMessageId(result.id);
+      // 3. Update UI to success screen
+      setLastMessageId(messageId);
       setSubmittedFeedback(pendingFeedback);
       setPendingFeedback(null);
     } catch (err: any) {
       console.error('Failed to dispatch feedback:', err);
       setErrorMessage(
         err.message ||
-          'Failed to send email to vexloraindia@gmail.com via Gmail. Please check your network connection and permissions.'
+          'Failed to submit feedback to vexloraindia@gmail.com. Please check your network connection.'
       );
     } finally {
       setIsSending(false);
