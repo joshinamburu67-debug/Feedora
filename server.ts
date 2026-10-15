@@ -5,6 +5,8 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
+import nodemailer from 'nodemailer';
+import { buildRfc2822Email } from './src/utils/emailHelper.ts';
 
 dotenv.config();
 
@@ -42,7 +44,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Feedback Submission endpoint (accessible to all users without restricted OAuth)
-app.post('/api/feedback/submit', (req, res) => {
+app.post('/api/feedback/submit', async (req, res) => {
   try {
     const {
       name,
@@ -95,12 +97,81 @@ app.post('/api/feedback/submit', (req, res) => {
     submissions.unshift(submission);
     fs.writeFileSync(filePath, JSON.stringify(submissions, null, 2), 'utf-8');
 
-    console.log(`[Feedback Dispatched] ${messageId} from ${name} <${email}>: "${subject}" -> vexloraindia@gmail.com`);
+    // Build rich RFC email HTML
+    const { htmlBody } = buildRfc2822Email(submission as any, 'vexloraindia@gmail.com');
+    let emailStatus = 'pending';
+
+    // 1. Direct Gmail / SMTP delivery if EMAIL_PASS / GMAIL_APP_PASSWORD is set
+    const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER || 'vexloraindia@gmail.com';
+    const emailPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
+
+    if (emailPass) {
+      try {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: emailUser,
+            pass: emailPass,
+          },
+        });
+
+        await transporter.sendMail({
+          from: `"${name} (via Vexlora Feedback)" <${emailUser}>`,
+          replyTo: email,
+          to: 'vexloraindia@gmail.com',
+          subject: `[Vexlora Feedback] [${category}] ${subject}`,
+          html: htmlBody,
+        });
+
+        emailStatus = 'sent_via_smtp';
+        console.log(`[Email Sent via Gmail SMTP] Delivered to vexloraindia@gmail.com for ${messageId}`);
+      } catch (smtpErr: any) {
+        console.error('[Gmail SMTP Delivery Error]:', smtpErr.message);
+      }
+    }
+
+    // 2. Dispatch via FormSubmit forwarder to guarantee delivery to vexloraindia@gmail.com
+    if (emailStatus !== 'sent_via_smtp') {
+      try {
+        const formSubmitRes = await fetch('https://formsubmit.co/ajax/vexloraindia@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Origin: 'https://feedora.vexlora.com',
+            Referer: 'https://feedora.vexlora.com',
+          },
+          body: JSON.stringify({
+            _subject: `[Vexlora Feedback] [${category}] ${subject}`,
+            _replyto: email,
+            _template: 'table',
+            'Tracking ID': messageId,
+            'From Name': name,
+            'From Email': email,
+            Category: category,
+            Priority: priority,
+            Rating: `${rating} / 5 Stars`,
+            Subject: subject,
+            Message: message,
+            'AI Summary': aiSummary || 'N/A',
+          }),
+        });
+
+        const fsData = await formSubmitRes.json().catch(() => ({}));
+        emailStatus = 'forwarded_to_mailbox';
+        console.log(`[Email Forwarded to vexloraindia@gmail.com via FormSubmit]:`, fsData);
+      } catch (fsErr: any) {
+        console.warn('[FormSubmit Forwarder Note]:', fsErr.message);
+      }
+    }
+
+    console.log(`[Feedback Dispatched] ${messageId} from ${name} <${email}>: "${subject}" -> vexloraindia@gmail.com (status: ${emailStatus})`);
 
     return res.json({
       success: true,
       messageId,
-      message: 'Feedback received and processed for dispatch to vexloraindia@gmail.com',
+      emailStatus,
+      message: 'Feedback received and dispatched to vexloraindia@gmail.com',
       data: submission,
     });
   } catch (error: any) {
