@@ -38,6 +38,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     service: 'Vexlora Feedback Service',
+    appletId: '1305546b-381c-4036-b0d6-64caeb1087c6',
+    automationStatus: 'unlocked',
     geminiConfigured: !!ai,
     timestamp: new Date().toISOString(),
   });
@@ -57,6 +59,7 @@ app.post('/api/feedback/submit', async (req, res) => {
       aiSummary,
       aiTone,
       deviceInfo,
+      appletId = '1305546b-381c-4036-b0d6-64caeb1087c6',
     } = req.body;
 
     if (!name || !email || !subject || !message) {
@@ -76,6 +79,8 @@ app.post('/api/feedback/submit', async (req, res) => {
       aiSummary,
       aiTone,
       deviceInfo,
+      appletId,
+      automationStatus: 'unlocked',
       submittedAt: new Date().toISOString(),
       recipient: 'vexloraindia@gmail.com',
     };
@@ -171,6 +176,8 @@ app.post('/api/feedback/submit', async (req, res) => {
       success: true,
       messageId,
       emailStatus,
+      appletId,
+      automationStatus: 'unlocked',
       message: 'Feedback received and dispatched to vexloraindia@gmail.com',
       data: submission,
     });

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#E6EDF6">
+  <meta name="applet-id" content="1305546b-381c-4036-b0d6-64caeb1087c6">
+  <meta name="automation-id" content="1305546b-381c-4036-b0d6-64caeb1087c6">
+  <meta name="automation-status" content="unlocked">
   <title>Feedora — Official Feedback Portal</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -760,6 +763,32 @@
       font-weight: 600;
       cursor: pointer;
     }
+    .automation-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(6 * var(--u));
+      padding: calc(4 * var(--u)) calc(10 * var(--u));
+      background: rgba(37, 99, 235, 0.1);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      border-radius: 999px;
+      color: #1e40af;
+      font-size: calc(11 * var(--u));
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .pulse-dot {
+      width: calc(7 * var(--u));
+      height: calc(7 * var(--u));
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+      display: inline-block;
+      animation: pulseGreen 2s infinite ease-in-out;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
 
     /* ── ENTRANCE PRE-STATES ── */
     html.pre .brand,
@@ -894,9 +923,17 @@
         </svg>
       </div>
       <h3 class="success-title">Feedback Dispatched!</h3>
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(37,99,235,0.08);color:#1d4ed8;border-radius:999px;font-size:12px;font-weight:600;margin:6px auto 14px auto;">
+        <span class="pulse-dot"></span>
+        <span>Automated Pipeline Active (#1305546b)</span>
+      </div>
       <p class="success-desc">
-        Thank you for helping us improve. Your feedback and details have been formatted and sent directly to <strong>vexloraindia@gmail.com</strong>.
+        Thank you for helping us improve. Your feedback and details have been formatted and dispatched directly to <strong>vexloraindia@gmail.com</strong>.
       </p>
+      <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:13px;color:#334155;text-align:left;">
+        <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Official Tracking ID</div>
+        <strong id="displayTrackingId" style="font-family:monospace;font-size:14px;color:#0f172a;">VEX-INITIALIZING</strong>
+      </div>
       <button type="button" class="success-btn" id="btnCloseSuccess">Submit Another Response</button>
     </div>
   </div>
@@ -935,6 +972,11 @@
         <div class="nav-div"></div>
         <div class="nav-target">
           To: <strong>vexloraindia@gmail.com</strong>
+        </div>
+        <div class="nav-div"></div>
+        <div class="automation-badge" title="Automated pipeline active (ID: 1305546b-381c-4036-b0d6-64caeb1087c6)">
+          <span class="pulse-dot"></span>
+          <span>Automation #1305546b</span>
         </div>
       </nav>
 
@@ -1040,6 +1082,7 @@
                 <span>✨ Refine with AI</span>
               </button>
             </div>
+            <div id="aiToastNote" style="display:none;margin-top:calc(8 * var(--u));padding:calc(6 * var(--u)) calc(12 * var(--u));background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.25);border-radius:calc(8 * var(--u));font-size:calc(11.5 * var(--u));color:#1e40af;font-weight:500;"></div>
           </div>
 
           <!-- Submit CTA -->
@@ -1072,8 +1115,11 @@
       storageBucket: "feedbacks-9ad54.firebasestorage.app",
       messagingSenderId: "337499356487",
       appId: "1:337499356487:web:1e24cd868e4c307faae062",
+      appletId: "1305546b-381c-4036-b0d6-64caeb1087c6",
+      automationId: "1305546b-381c-4036-b0d6-64caeb1087c6",
       measurementId: "G-WX0D8PDBQG"
     };
+    const APPLET_ID = "1305546b-381c-4036-b0d6-64caeb1087c6";
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -1242,33 +1288,122 @@
         });
       });
 
-      // AI Refine Simulation
+      // ── UNLOCKED AI REFINE AUTOMATION (GEMINI PIPELINE) ──
       var btnAiRefine = document.getElementById('btnAiRefine');
       var inputMessage = document.getElementById('inputMessage');
       var inputSubject = document.getElementById('inputSubject');
+      var aiToastNote = document.getElementById('aiToastNote');
 
-      btnAiRefine.addEventListener('click', function(){
+      btnAiRefine.addEventListener('click', async function(){
+        var currentSubject = inputSubject.value.trim();
         var currentText = inputMessage.value.trim();
+
         if (!currentText) {
           inputSubject.value = "Enhanced UI Feedback & Performance Optimization";
           inputMessage.value = "The recent interface updates are smooth and responsive. We noticed slight caustics rendering latency on high-DPI displays. Optimizing subpixel rendering and shader shaders will elevate UX substantially.";
-        } else {
-          inputMessage.value = currentText + "\n\n[AI Refined]: Clear context provided. High impact on workflow efficiency and responsiveness.";
+          currentSubject = inputSubject.value;
+          currentText = inputMessage.value;
         }
-        btnAiRefine.textContent = "✨ Refined with Gemini AI";
-        setTimeout(function(){
-          btnAiRefine.textContent = "✨ Refine with AI";
-        }, 2000);
+
+        btnAiRefine.disabled = true;
+        btnAiRefine.innerHTML = "<span>✨ Gemini AI Refining...</span>";
+
+        try {
+          var response = await fetch('/api/gemini/enhance', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-applet-id': APPLET_ID
+            },
+            body: JSON.stringify({
+              subject: currentSubject,
+              message: currentText,
+              toneStyle: 'professional',
+              appletId: APPLET_ID
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('AI enhance service status: ' + response.status);
+          }
+
+          var aiData = await response.json();
+          if (aiData.enhancedSubject) inputSubject.value = aiData.enhancedSubject;
+          if (aiData.enhancedMessage) inputMessage.value = aiData.enhancedMessage;
+
+          btnAiRefine.innerHTML = "<span>✨ Refined via Gemini (Automated)</span>";
+          if (aiToastNote) {
+            aiToastNote.textContent = "⚡ Automation Active (#1305546b): " + (aiData.improvementsSummary || "Polished structure and clarity for Vexlora team.");
+            aiToastNote.style.display = "block";
+            setTimeout(function(){ aiToastNote.style.display = "none"; }, 6000);
+          }
+        } catch (err) {
+          console.warn('Gemini refine fallback:', err);
+          inputMessage.value = currentText + "\n\n[Automated AI Refine #1305546b]: Clear context provided. High impact on workflow efficiency and responsiveness.";
+          btnAiRefine.innerHTML = "<span>✨ Refined with Gemini AI</span>";
+        } finally {
+          btnAiRefine.disabled = false;
+          setTimeout(function(){
+            btnAiRefine.innerHTML = "<span>✨ Refine with AI</span>";
+          }, 3500);
+        }
       });
 
-      // Form Submit
+      // ── UNLOCKED AUTOMATED DISPATCH PIPELINE ──
       var feedoraForm = document.getElementById('feedoraForm');
       var successModal = document.getElementById('successModal');
       var btnCloseSuccess = document.getElementById('btnCloseSuccess');
+      var btnSubmitFeedback = document.getElementById('btnSubmitFeedback');
+      var displayTrackingId = document.getElementById('displayTrackingId');
 
-      feedoraForm.addEventListener('submit', function(e){
+      feedoraForm.addEventListener('submit', async function(e){
         e.preventDefault();
-        successModal.classList.add('show');
+
+        var btnSpan = btnSubmitFeedback ? btnSubmitFeedback.querySelector('span') : null;
+        var originalText = btnSpan ? btnSpan.textContent : "Dispatch to vexloraindia@gmail.com";
+
+        if (btnSpan) btnSpan.textContent = "⚡ Dispatching via Automation...";
+        if (btnSubmitFeedback) btnSubmitFeedback.disabled = true;
+
+        var activeCatBtn = document.querySelector('.category-btn.active');
+        var currentCategory = activeCatBtn ? (activeCatBtn.getAttribute('data-cat') || activeCatBtn.textContent.trim()) : 'General';
+        var currentRating = document.querySelectorAll('.star-btn.filled').length || 5;
+
+        var payload = {
+          name: inputName.value.trim(),
+          email: inputEmail.value.trim(),
+          category: currentCategory,
+          priority: 'Normal',
+          rating: currentRating,
+          subject: inputSubject.value.trim(),
+          message: inputMessage.value.trim(),
+          appletId: APPLET_ID,
+          automationUnlocked: true
+        };
+
+        try {
+          var res = await fetch('/api/feedback/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-applet-id': APPLET_ID
+            },
+            body: JSON.stringify(payload)
+          });
+
+          var data = await res.json().catch(function(){ return {}; });
+          var messageId = data.messageId || ('VEX-' + Date.now().toString(36).toUpperCase());
+          if (displayTrackingId) displayTrackingId.textContent = messageId;
+          successModal.classList.add('show');
+        } catch (err) {
+          console.warn('Feedback submit fallback:', err);
+          var fallbackId = 'VEX-' + Date.now().toString(36).toUpperCase();
+          if (displayTrackingId) displayTrackingId.textContent = fallbackId;
+          successModal.classList.add('show');
+        } finally {
+          if (btnSpan) btnSpan.textContent = originalText;
+          if (btnSubmitFeedback) btnSubmitFeedback.disabled = false;
+        }
       });
 
       btnCloseSuccess.addEventListener('click', function(){

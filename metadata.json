@@ -1,6 +1,8 @@
 {
   "name": "Vexlora India Feedback Portal",
   "description": "Submit feedback directly to Vexlora India with AI-powered refinement, categorization, and instant email dispatch via Gmail.",
+  "appId": "1305546b-381c-4036-b0d6-64caeb1087c6",
+  "appletId": "1305546b-381c-4036-b0d6-64caeb1087c6",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
